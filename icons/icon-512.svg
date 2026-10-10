@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Ecopontos Belém icon">
+  <defs>
+    <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#0f3d2e"/>
+      <stop offset="100%" stop-color="#1f5b47"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="100" fill="url(#g1)"/>
+  <circle cx="256" cy="256" r="170" fill="#dff4d6"/>
+  <path d="M256 120c-45 0-85 27-104 66l-23 42a21 21 0 0 0 18 31h222a21 21 0 0 0 18-31l-23-42c-19-39-59-66-104-66zm-100 165h200l-20 83H176l-20-83zm52-122h96l-4 49h-88l-4-49zm23 150h50v22h-50v-22zm70 0h50v22h-50v-22zm-96 44h192v22H176v-22z" fill="#0f3d2e"/>
+  <path d="M176 256h160v48H176z" fill="#8ad36d" opacity="0.9"/>
+</svg>

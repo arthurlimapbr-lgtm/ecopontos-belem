@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Ecopontos Belém: mapa de coleta seletiva, guia de reciclagem e quiz ambiental para Belém do Pará."
+    />
+    <meta name="theme-color" content="#0f3d2e" />
+    <title>Ecopontos Belém</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="icons/icon-192.svg" />
+    <link rel="apple-touch-icon" href="icons/icon-192.svg" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="offlineBanner" class="offline-banner" role="status" aria-live="polite">
+      Você está offline. Os dados salvos localmente continuam disponíveis.
+    </div>
+
+    <header class="site-header">
+      <div class="container nav-wrap">
+        <div class="brand" aria-label="Ecopontos Belém">
+          <span class="brand-mark">♻️</span>
+          <div>
+            <strong>Ecopontos Belém</strong>
+            <small>Educação ambiental</small>
+          </div>
+        </div>
+
+        <nav class="main-nav" aria-label="Navegação principal">
+          <a href="#home">Início</a>
+          <a href="#map">Mapa</a>
+          <a href="#guide">Guia</a>
+          <a href="#quiz">Quiz</a>
+          <a href="#about">Sobre</a>
+        </nav>
+
+        <button id="installBtn" class="install-btn" type="button" hidden>
+          Instalar app
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section id="home" class="hero-section">
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <span class="eyebrow">Sustentabilidade para Belém</span>
+            <h1>Encontre o ponto certo para cada material.</h1>
+            <p>
+              Descubra locais de coleta seletiva, materiais aceitos e orientações práticas
+              para reduzir resíduos e promover a reciclagem na cidade.
+            </p>
+
+            <div class="search-panel" aria-label="Pesquisa de ecopontos">
+              <label class="sr-only" for="searchInput">Pesquisar ecopontos</label>
+              <input
+                id="searchInput"
+                type="search"
+                placeholder="Ponto, bairro, endereço ou material"
+                list="searchSuggestions"
+                autocomplete="off"
+                aria-describedby="searchHelp"
+              />
+              <button id="searchButton" type="button">Buscar</button>
+              <button id="clearSearchButton" class="search-clear" type="button" aria-label="Limpar pesquisa">Limpar</button>
+              <datalist id="searchSuggestions"></datalist>
+            </div>
+            <p id="searchHelp" class="search-help">Busca sem diferenciar maiúsculas ou acentos. Combine termos para refinar os resultados.</p>
+
+            <div class="hero-actions">
+              <a class="primary-btn" href="#map">Abrir mapa</a>
+              <a class="secondary-btn" href="#guide">Guia de reciclagem</a>
+            </div>
+          </div>
+
+          <div class="hero-highlight" aria-label="Destaques ambientais">
+            <div class="highlight-card">
+              <h2>Por que separar corretamente?</h2>
+              <ul>
+                <li>Evita contaminação e aumenta a reciclagem.</li>
+                <li>Contribui para a limpeza de ruas e rios.</li>
+                <li>Ajuda a reduzir o consumo de recursos naturais.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="stats-section">
+        <div class="container stats-grid">
+          <article class="stat-card">
+            <strong id="statPoints">0</strong>
+            <span>Locais cadastrados</span>
+          </article>
+          <article class="stat-card">
+            <strong id="statMaterials">9</strong>
+            <span>Tipos de materiais</span>
+          </article>
+          <article class="stat-card">
+            <strong id="statVerified">0</strong>
+            <span>Verificados</span>
+          </article>
+          <article class="stat-card">
+            <strong>100%</strong>
+            <span>Offline-ready</span>
+          </article>
+        </div>
+      </section>
+
+      <section id="map" class="content-section">
+        <div class="container">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">Mapa de coleta</span>
+              <h2>Locais de recebimento em Belém</h2>
+            </div>
+            <button id="nearbyButton" type="button" class="secondary-btn compact-btn">
+              Usar minha localização
+            </button>
+          </div>
+
+          <div class="filters-panel" aria-label="Filtros do mapa">
+            <label>
+              Bairro
+              <select id="bairroFilter"></select>
+            </label>
+            <label>
+              Material
+              <select id="materialFilter"></select>
+            </label>
+            <label>
+              Categoria
+              <select id="categoryFilter"></select>
+            </label>
+            <label class="checkbox-wrap">
+              <input id="verifiedFilter" type="checkbox" />
+              Apenas dados verificados
+            </label>
+            <label class="checkbox-wrap">
+              <input id="favoritesFilter" type="checkbox" />
+              Apenas favoritos
+            </label>
+            <label>
+              Ordenar por
+              <select id="sortFilter">
+                <option value="relevance">Relevância</option>
+                <option value="name">Nome (A–Z)</option>
+                <option value="distance">Proximidade</option>
+              </select>
+            </label>
+            <button id="clearFiltersButton" type="button" class="filter-reset">Limpar filtros</button>
+          </div>
+
+          <div id="activeFilters" class="active-filters" aria-live="polite"></div>
+          <p id="dataCoverageNote" class="coverage-note">
+            Há 1 Ecoponto com operação descrita pela Prefeitura e 13 locais listados em anúncio de instalação de LEVs de 2025. A presença atual dos LEVs, seus endereços exatos, materiais e horários não foi confirmada; por isso aparecem como candidatos pendentes, sem marcadores inventados no mapa.
+            <a href="https://agencia.belem.pa.gov.br/prefeitura-de-belem-inaugura-primeiro-ecoponto-da-cidade/" target="_blank" rel="noreferrer">Consultar a fonte oficial sobre o projeto-piloto</a>.
+          </p>
+
+          <div class="map-layout">
+            <div class="map-panel">
+              <div id="mapView" aria-label="Mapa com ecopontos"></div>
+            </div>
+
+            <aside class="points-panel">
+              <div class="points-header">
+                <h3>Lista de locais</h3>
+                <span id="resultsSummary" aria-live="polite">0 resultados</span>
+              </div>
+              <div id="pointsList" class="points-list" aria-live="polite"></div>
+            </aside>
+          </div>
+
+          <div id="pointDetail" class="point-detail" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section id="guide" class="content-section alt-section">
+        <div class="container">
+          <div class="section-heading center">
+            <div>
+              <span class="eyebrow">Guia prático</span>
+              <h2>Como separar cada material</h2>
+            </div>
+          </div>
+
+          <div id="guideList" class="guide-list"></div>
+        </div>
+      </section>
+
+      <section id="quiz" class="content-section">
+        <div class="container quiz-block">
+          <div class="section-heading center">
+            <div>
+              <span class="eyebrow">Quiz ambiental</span>
+              <h2>Teste seus conhecimentos</h2>
+            </div>
+          </div>
+
+          <div id="quizCard" class="quiz-card" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section id="about" class="content-section alt-section">
+        <div class="container about-grid">
+          <article class="about-card">
+            <span class="eyebrow">Projeto</span>
+            <h3>Sobre o Ecopontos Belém</h3>
+            <p>
+              Este projeto foi pensado como ferramenta educativa e de apoio à coleta seletiva
+              na cidade de Belém. A proposta é facilitar o acesso às informações e motivar
+              a participação da comunidade.
+            </p>
+            <p>
+              A base de dados foi estruturada para receber registros oficiais e comunitários,
+              sempre com rastreio de origem e data de verificação.
+            </p>
+          </article>
+
+          <article class="about-card">
+            <span class="eyebrow">Fontes</span>
+            <h3>Dados e referências</h3>
+            <ul id="sourcesList" class="source-list"></ul>
+          </article>
+
+          <article class="about-card">
+            <span class="eyebrow">Contribuição</span>
+            <h3>Comunidade</h3>
+            <p>
+              Sugestões de novos locais devem passar por revisão antes de serem publicadas
+              como informações oficiais. Use o rascunho abaixo para registrar uma proposta e
+              enviá-la por canal oficial.
+            </p>
+
+            <form id="suggestionForm">
+              <label for="suggestionInput">Sugerir novo local ou corrigir informação</label>
+              <textarea
+                id="suggestionInput"
+                rows="4"
+                placeholder="Descreva o local, endereço, materiais aceitos e a fonte de referência."
+              ></textarea>
+              <button type="submit" class="primary-btn small-btn">Salvar rascunho</button>
+            </form>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-row">
+        <p>Última atualização dos dados: <strong id="lastUpdatedText"></strong></p>
+        <p>Informações do local baseadas nas fontes oficiais indicadas no app.</p>
+      </div>
+    </footer>
+
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script src="js/data.js" defer></script>
+    <script src="js/app.js" defer></script>
+  </body>
+</html>
